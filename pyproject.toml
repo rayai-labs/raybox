@@ -1,0 +1,9 @@
+[project]
+name = "raybox"
+version = "0.1.0"
+description = "AI Sandbox environment orchestration with Ray"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "ray[serve]>=2.49.2",
+]
