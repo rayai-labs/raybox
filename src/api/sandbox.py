@@ -170,9 +170,9 @@ class SandboxActor:
         try:
             # Install packages using pip
             exit_code, output = self.container.exec_run(
-                cmd=["pip", "install"] + packages
+                cmd=["pip", "install", "--root-user-action=ignore"] + packages
             )
-            output_str = output.decode('utf-8') if isinstance(output, bytes) else str(output)
+            output_str = output.decode('utf-8', errors='replace') if isinstance(output, bytes) else str(output)
             execution_time = (time.time() - start_time) * 1000
 
             if exit_code == 0:
