@@ -1706,6 +1706,7 @@ dependencies = [
     { name = "podman" },
     { name = "python-dotenv" },
     { name = "ray", extra = ["serve"] },
+    { name = "requests" },
     { name = "smolagents", extra = ["openai", "toolkit"] },
 ]
 
@@ -1716,6 +1717,7 @@ requires-dist = [
     { name = "podman", specifier = ">=5.6.0" },
     { name = "python-dotenv", specifier = ">=1.1.1" },
     { name = "ray", extras = ["serve"], specifier = ">=2.49.2" },
+    { name = "requests", specifier = ">=2.32.0" },
     { name = "smolagents", extras = ["openai", "toolkit"], specifier = ">=1.22.0" },
 ]
 
