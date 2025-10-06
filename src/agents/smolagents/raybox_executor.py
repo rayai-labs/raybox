@@ -1,38 +1,47 @@
+"""
+Raybox Executor - HTTP Client for Raybox API
+
+This executor connects to Raybox API server via HTTP (no Ray dependency required).
+"""
+
 from smolagents.remote_executors import RemotePythonExecutor
 from smolagents.local_python_executor import CodeOutput
 from smolagents import AgentError
-import ray
-import uuid
-from api import SandboxActor
+import requests
+import os
 
 
 class RayboxExecutor(RemotePythonExecutor):
     """
-    Executes Python code using Raybox sandboxes.
+    Executes Python code using Raybox sandboxes via HTTP API.
 
     Args:
         additional_imports (`list[str]`): Additional imports to install.
         logger (`Logger`): Logger to use.
+        api_url (`str`, optional): Raybox API URL. Defaults to env var RAYBOX_API_URL or http://localhost:8000
         **kwargs: Additional arguments for sandbox configuration.
     """
 
-    def __init__(self, additional_imports: list[str], logger, **kwargs):
+    def __init__(self, additional_imports: list[str], logger, api_url: str = None, **kwargs):
         super().__init__(additional_imports, logger)
 
-        # Initialize Ray if not already initialized
-        if not ray.is_initialized():
-            ray.init(ignore_reinit_error=True)
+        # Get API URL from parameter, env var, or default
+        self.api_url = api_url or os.getenv("RAYBOX_API_URL", "http://localhost:8000")
+        self.session = requests.Session()
 
-        # Create sandbox configuration
-        sandbox_id = str(uuid.uuid4())
+        # Create sandbox via HTTP API
         config = {
             "memory_limit_mb": kwargs.get("memory_limit_mb", 512),
             "cpu_limit": kwargs.get("cpu_limit", 1.0),
             "timeout": kwargs.get("timeout", 300)
         }
 
-        # Create Ray sandbox actor
-        self.sandbox_actor = SandboxActor.remote(sandbox_id, config)
+        response = self.session.post(f"{self.api_url}/sandboxes", json=config, timeout=300)
+        response.raise_for_status()
+        sandbox_data = response.json()
+
+        self.sandbox_id = sandbox_data["sandbox_id"]
+        self.logger.log(f"Raybox sandbox created: {self.sandbox_id}", level=31)
 
         # Install additional packages if needed
         if additional_imports:
@@ -40,17 +49,22 @@ class RayboxExecutor(RemotePythonExecutor):
         else:
             self.installed_packages = []
 
-        self.logger.log("Raybox sandbox is running", level=31)  # INFO level
-
     def install_packages(self, additional_imports: list[str]) -> list[str]:
         """Install Python packages in the sandbox."""
         if not additional_imports:
             return []
 
         self.logger.log(f"Installing packages: {additional_imports}", level=31)
-        result = ray.get(self.sandbox_actor.install_packages.remote(additional_imports))
 
-        if result["success"]:
+        response = self.session.post(
+            f"{self.api_url}/sandboxes/{self.sandbox_id}/packages",
+            json=additional_imports,
+            timeout=300
+        )
+        response.raise_for_status()
+        result = response.json()
+
+        if result.get("success"):
             self.logger.log(f"Installed packages: {', '.join(result['installed'])}", level=31)
             return result["installed"]
         else:
@@ -63,12 +77,19 @@ class RayboxExecutor(RemotePythonExecutor):
         super().send_tools(tools)
 
     def run_code_raise_errors(self, code: str) -> CodeOutput:
-        """Execute code in the Raybox sandbox."""
+        """Execute code in the Raybox sandbox via HTTP."""
         # Debug: log what code is being executed
         if "def " in code or "class " in code:
             self.logger.log(f"Executing tool definition code (length: {len(code)})", level=31)
 
-        result = ray.get(self.sandbox_actor.execute.remote(code))
+        # Execute code via HTTP API
+        response = self.session.post(
+            f"{self.api_url}/sandboxes/{self.sandbox_id}/execute",
+            json={"code": code},
+            timeout=300
+        )
+        response.raise_for_status()
+        result = response.json()
 
         execution_logs = result["stdout"]
 
@@ -100,12 +121,14 @@ class RayboxExecutor(RemotePythonExecutor):
         return CodeOutput(output=execution_logs or None, logs=execution_logs, is_final_answer=False)
 
     def cleanup(self):
-        """Clean up the Raybox sandbox and resources."""
+        """Clean up the Raybox sandbox."""
         try:
-            if hasattr(self, "sandbox_actor"):
-                self.logger.log("Shutting down sandbox...", level=31)  # INFO level
-                ray.get(self.sandbox_actor.terminate.remote())
-                self.logger.log("Sandbox cleanup completed", level=31)  # INFO level
-                del self.sandbox_actor
+            if hasattr(self, "sandbox_id"):
+                self.logger.log("Shutting down sandbox...", level=31)
+                self.session.delete(f"{self.api_url}/sandboxes/{self.sandbox_id}", timeout=300)
+                self.logger.log("Sandbox cleanup completed", level=31)
         except Exception as e:
-            self.logger.log(f"Error during cleanup: {e}", level=40)  # ERROR level
+            self.logger.log(f"Error during cleanup: {e}", level=40)
+        finally:
+            if hasattr(self, "session"):
+                self.session.close()
