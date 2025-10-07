@@ -15,7 +15,7 @@ model = LiteLLMModel(
     api_key=os.getenv("ANTHROPIC_API_KEY"),
 )
 
-# Create agent with local executor first
+# Create agent with local executor, since smolagents dont have native support for Raybox executor yet
 agent = CodeAgent(tools=[WebSearchTool()], model=model, executor_type="local", stream_outputs=True)
 
 # Replace with Raybox executor
