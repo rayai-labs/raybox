@@ -46,8 +46,32 @@ jobs:
       - name: Install dependencies
         run: uv sync --extra dev
 
+      - name: Install Podman
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
+
+      - name: Configure Podman for rootless mode
+        run: |
+          # Enable lingering for the user to allow systemd services
+          sudo loginctl enable-linger $USER
+          # Start podman socket
+          systemctl --user start podman.socket
+          # Verify socket exists
+          ls -la /run/user/$(id -u)/podman/podman.sock || echo "Socket not found"
+
+      - name: Verify Podman installation
+        run: |
+          podman version
+          podman info
+
+      - name: Pull required images
+        run: podman pull python:3.12
+
       - name: Run unit tests
-        run: uv run pytest -v
+        run: |
+          export CONTAINER_HOST=unix:///run/user/$(id -u)/podman/podman.sock
+          uv run pytest -v
 
   all-checks:
     name: All Checks Passed

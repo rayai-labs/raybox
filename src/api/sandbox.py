@@ -62,9 +62,15 @@ class SandboxActor:
         # Set CONTAINER_HOST for Podman if not already set
         # This ensures Ray workers can connect to Podman
         if not os.environ.get("CONTAINER_HOST"):
-            podman_sock = os.path.expanduser("~/.local/share/containers/podman/machine/podman.sock")
-            if os.path.exists(podman_sock):
-                os.environ["CONTAINER_HOST"] = f"unix://{podman_sock}"
+            # Try common Podman socket locations
+            podman_sockets = [
+                os.path.expanduser("~/.local/share/containers/podman/machine/podman.sock"),
+                f"/run/user/{os.getuid()}/podman/podman.sock",
+            ]
+            for podman_sock in podman_sockets:
+                if os.path.exists(podman_sock):
+                    os.environ["CONTAINER_HOST"] = f"unix://{podman_sock}"
+                    break
 
         # Use from_env() to auto-detect Podman socket from environment
         # Falls back to default Podman socket locations
