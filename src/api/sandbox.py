@@ -54,7 +54,7 @@ class SandboxActor:
         self.status = "initializing"
         self.created_at = datetime.utcnow().isoformat()
         self.container_name = f"raybox-{sandbox_id[:8]}"
-        self.installed_packages = set()
+        self.installed_packages: set[str] = set()
 
         # Set CONTAINER_HOST for Podman if not already set
         # This ensures Ray workers can connect to Podman
@@ -66,8 +66,8 @@ class SandboxActor:
         # Use from_env() to auto-detect Podman socket from environment
         # Falls back to default Podman socket locations
         self.podman_client = PodmanClient.from_env()
-        self.container = None
-        self.executor_process = None
+        self.container: Any = None  # podman.domain.containers.Container type
+        self.executor_process: Any = None  # subprocess.Popen type
 
         # Start Podman container
         self._start_container()

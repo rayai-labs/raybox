@@ -22,7 +22,7 @@ class RayboxExecutor(RemotePythonExecutor):
         **kwargs: Additional arguments for sandbox configuration.
     """
 
-    def __init__(self, additional_imports: list[str], logger, api_url: str = None, **kwargs):
+    def __init__(self, additional_imports: list[str], logger, api_url: str | None = None, **kwargs):
         super().__init__(additional_imports, logger)
 
         # Get API URL from parameter, env var, or default
@@ -65,8 +65,9 @@ class RayboxExecutor(RemotePythonExecutor):
         result = response.json()
 
         if result.get("success"):
-            self.logger.log(f"Installed packages: {', '.join(result['installed'])}", level=31)
-            return result["installed"]
+            installed: list[str] = result["installed"]
+            self.logger.log(f"Installed packages: {', '.join(installed)}", level=31)
+            return installed
         else:
             self.logger.log(f"Failed to install packages: {result.get('error', 'Unknown error')}", level=40)
             return []
