@@ -5,5 +5,68 @@ description = "AI Sandbox environment orchestration with Ray"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "anthropic>=0.69.0",
+    "requests>=2.32.0",
+    "litellm>=1.77.7",
+    "podman>=5.6.0",
+    "python-dotenv>=1.1.1",
     "ray[serve]>=2.49.2",
+    "smolagents[openai,toolkit]>=1.22.0",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "mypy>=1.13.0",
+    "types-requests>=2.32.0",
+    "black>=25.1.0",
+    "ruff>=0.11.0",
+]
+
+[project.scripts]
+raybox = "api.cli:main"
+
+[tool.black]
+line-length = 100
+target-version = ['py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by black)
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # ignore unused imports in __init__.py
+
+[tool.ruff.lint.isort]
+known-first-party = ["api", "agents"]
