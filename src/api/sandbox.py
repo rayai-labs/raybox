@@ -9,8 +9,8 @@ import time
 from datetime import datetime
 from typing import Any
 
+import docker
 import ray
-from podman import PodmanClient
 from pydantic import BaseModel, Field
 
 
@@ -46,10 +46,10 @@ class ExecutionResult(BaseModel):
     execution_time_ms: float = 0.0
 
 
-# Ray Actor for Sandbox with Podman
+# Ray Actor for Sandbox with Docker
 @ray.remote
 class SandboxActor:
-    """Isolated sandbox environment using Podman container."""
+    """Isolated sandbox environment using Docker container."""
 
     def __init__(self, sandbox_id: str, config: dict[str, Any]):
         self.sandbox_id = sandbox_id
@@ -59,43 +59,29 @@ class SandboxActor:
         self.container_name = f"raybox-{sandbox_id[:8]}"
         self.installed_packages: set[str] = set()
 
-        # Set CONTAINER_HOST for Podman if not already set
-        # This ensures Ray workers can connect to Podman
-        if not os.environ.get("CONTAINER_HOST"):
-            # Try common Podman socket locations
-            podman_sockets = [
-                os.path.expanduser("~/.local/share/containers/podman/machine/podman.sock"),
-                f"/run/user/{os.getuid()}/podman/podman.sock",
-            ]
-            for podman_sock in podman_sockets:
-                if os.path.exists(podman_sock):
-                    os.environ["CONTAINER_HOST"] = f"unix://{podman_sock}"
-                    break
-
-        # Use from_env() to auto-detect Podman socket from environment
-        # Falls back to default Podman socket locations
-        self.podman_client = PodmanClient.from_env()
-        self.container: Any = None  # podman.domain.containers.Container type
+        # Initialize Docker client
+        self.docker_client = docker.from_env()
+        self.container: Any = None  # docker.models.containers.Container type
         self.executor_process: Any = None  # subprocess.Popen type
 
-        # Start Podman container
+        # Start Docker container
         self._start_container()
 
         # Start the executor server inside container
         self._start_executor_server()
 
     def _start_container(self):
-        """Start a Podman container for this sandbox."""
+        """Start a Docker container for this sandbox."""
         try:
             # Create and start container with Python base image
             # Using full python image (not slim) to ensure pip is available
-            self.container = self.podman_client.containers.run(
+            self.container = self.docker_client.containers.run(
                 "python:3.12",
                 command=["sleep", "infinity"],
                 name=self.container_name,
                 detach=True,
                 mem_limit=f"{self.config.get('memory_limit_mb', 512)}m",
-                cpu_quota=int(self.config.get("cpu_limit", 1.0) * 100000),
+                nano_cpus=int(self.config.get("cpu_limit", 1.0) * 1_000_000_000),
                 network_mode="bridge",  # allow network for package installation
                 remove=False,
             )
@@ -118,15 +104,9 @@ class SandboxActor:
         )
         self.container.exec_run(cmd=["sh", "-c", write_cmd])
 
-        # Start the executor server in background using subprocess with podman exec
-        # Use full path to podman binary
-        podman_bin = "/opt/podman/bin/podman"
-        if not os.path.exists(podman_bin):
-            # Fallback to system podman
-            podman_bin = "podman"
-
+        # Start the executor server in background using subprocess with docker exec
         self.executor_process = subprocess.Popen(
-            [podman_bin, "exec", "-i", self.container_name, "python", "/tmp/executor_server.py"],
+            ["docker", "exec", "-i", self.container_name, "python", "/tmp/executor_server.py"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,

@@ -6,7 +6,7 @@ from smolagents import CodeAgent, LiteLLMModel, WebSearchTool
 # Import from installed package
 from agents.smolagents import RayboxExecutor
 
-# Load environment variables (including CONTAINER_HOST for Podman)
+# Load environment variables
 load_dotenv()
 
 # Use LiteLLM for Anthropic
