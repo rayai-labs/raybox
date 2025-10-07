@@ -28,7 +28,7 @@ make check                # All checks
 ## Requirements
 
 - Python 3.12+
-- Podman (for container isolation)
+- Docker (for container isolation)
 
 ## License
 MIT

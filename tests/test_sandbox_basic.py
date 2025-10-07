@@ -1,5 +1,5 @@
 """
-Test basic sandbox creation with Podman
+Test basic sandbox creation with Docker
 """
 
 import uuid
