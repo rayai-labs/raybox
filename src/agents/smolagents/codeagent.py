@@ -9,7 +9,7 @@ from agents.smolagents import RayboxExecutor
 # Load environment variables (including CONTAINER_HOST for Podman)
 load_dotenv()
 
-# Use LiteLLM which supports Anthropic
+# Use LiteLLM for Anthropic
 model = LiteLLMModel(
     model_id="claude-3-5-haiku-20241022",
     api_key=os.getenv("ANTHROPIC_API_KEY"),
