@@ -1,8 +1,9 @@
 """Integration tests for Raybox API endpoints"""
 
+import os
+
 import pytest
 import requests
-import os
 
 pytestmark = pytest.mark.integration
 
@@ -41,7 +42,7 @@ def sandbox_id(api_client, api_url):
     # Cleanup
     try:
         api_client.delete(f"{api_url}/sandboxes/{sandbox_id}")
-    except:
+    except Exception:
         pass
 
 

@@ -4,11 +4,12 @@ Raybox Executor - HTTP Client for Raybox API
 This executor connects to Raybox API server via HTTP (no Ray dependency required).
 """
 
-from smolagents.remote_executors import RemotePythonExecutor
-from smolagents.local_python_executor import CodeOutput
-from smolagents import AgentError
-import requests
 import os
+
+import requests
+from smolagents import AgentError
+from smolagents.local_python_executor import CodeOutput
+from smolagents.remote_executors import RemotePythonExecutor
 
 
 class RayboxExecutor(RemotePythonExecutor):
@@ -97,15 +98,15 @@ class RayboxExecutor(RemotePythonExecutor):
         # Check if this is a final answer
         if result.get("is_final_answer"):
             # This is the final answer - decode it and return
-            import pickle
             import base64
+            import pickle
 
             final_answer_data = result.get("final_answer_data", "")
             try:
                 # The final answer is base64-encoded pickled data in the exception message
                 final_answer = pickle.loads(base64.b64decode(final_answer_data))
                 return CodeOutput(output=final_answer, logs=execution_logs, is_final_answer=True)
-            except:
+            except Exception:
                 # If we can't decode it, just return the raw data
                 return CodeOutput(output=final_answer_data, logs=execution_logs, is_final_answer=True)
 

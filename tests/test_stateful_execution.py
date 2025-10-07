@@ -1,9 +1,11 @@
 """Test stateful code execution"""
 
+import uuid
+
 import pytest
 import ray
+
 from api.sandbox import SandboxActor
-import uuid
 
 
 @pytest.fixture(scope="module")

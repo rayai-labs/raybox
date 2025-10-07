@@ -1,7 +1,7 @@
-from smolagents import CodeAgent, WebSearchTool
-from smolagents import LiteLLMModel
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+from smolagents import CodeAgent, LiteLLMModel, WebSearchTool
 
 # Import from installed package
 from agents.smolagents import RayboxExecutor

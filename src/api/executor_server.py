@@ -3,8 +3,8 @@ Python executor server that maintains state between executions.
 This runs inside the sandbox container.
 """
 
-import sys
 import json
+import sys
 import traceback
 from io import StringIO
 
@@ -79,7 +79,7 @@ def main():
             # Write result as JSON
             print(json.dumps(result), flush=True)
 
-        except Exception as e:
+        except Exception:
             error_result = {
                 "stdout": "",
                 "stderr": "",

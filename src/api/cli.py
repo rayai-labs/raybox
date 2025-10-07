@@ -1,8 +1,9 @@
 """Raybox CLI"""
 
-from dotenv import load_dotenv
 import subprocess
 import sys
+
+from dotenv import load_dotenv
 
 
 def main():

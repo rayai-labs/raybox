@@ -2,15 +2,20 @@
 Raybox API Server - Ray Serve + FastAPI
 """
 
-from typing import Dict
-from fastapi import FastAPI, HTTPException
-from ray import serve
-import ray
 import uuid
 from datetime import datetime
 
-from .sandbox import SandboxActor, SandboxCreateRequest, SandboxInfo, CodeExecutionRequest, ExecutionResult
+import ray
+from fastapi import FastAPI, HTTPException
+from ray import serve
 
+from .sandbox import (
+    CodeExecutionRequest,
+    ExecutionResult,
+    SandboxActor,
+    SandboxCreateRequest,
+    SandboxInfo,
+)
 
 # FastAPI app
 app = FastAPI(
@@ -30,7 +35,7 @@ class RayboxAPI:
 
     def __init__(self):
         # Track active sandboxes: {sandbox_id: actor_handle}
-        self.sandboxes: Dict[str, ray.ObjectRef] = {}
+        self.sandboxes: dict[str, ray.ObjectRef] = {}
 
     @app.get("/health")
     async def health_check(self):

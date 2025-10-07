@@ -1,8 +1,10 @@
 """Integration test for CodeAgent with RayboxExecutor"""
 
-import pytest
 import os
-from smolagents import CodeAgent, WebSearchTool, LiteLLMModel
+
+import pytest
+from smolagents import CodeAgent, LiteLLMModel, WebSearchTool
+
 from agents.smolagents.raybox_executor import RayboxExecutor
 
 

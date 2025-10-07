@@ -2,10 +2,12 @@
 Test basic sandbox creation with Podman
 """
 
+import uuid
+
 import pytest
 import ray
+
 from api.sandbox import SandboxActor
-import uuid
 
 
 @pytest.fixture(scope="module")

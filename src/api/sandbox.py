@@ -2,17 +2,16 @@
 Raybox Sandbox API
 """
 
-from typing import Dict, Any, Optional, List
-from datetime import datetime
-from pydantic import BaseModel, Field
-import ray
-import uuid
-import subprocess
-import tempfile
-import time
-import os
 import json
+import os
+import subprocess
+import time
+from datetime import datetime
+from typing import Any
+
+import ray
 from podman import PodmanClient
+from pydantic import BaseModel, Field
 
 
 class SandboxCreateRequest(BaseModel):
@@ -38,8 +37,8 @@ class ExecutionResult(BaseModel):
     """Code execution result."""
     stdout: str = ""
     stderr: str = ""
-    error: Optional[str] = None
-    results: List[Dict[str, Any]] = Field(default_factory=list)
+    error: str | None = None
+    results: list[dict[str, Any]] = Field(default_factory=list)
     execution_time_ms: float = 0.0
 
 
@@ -48,7 +47,7 @@ class ExecutionResult(BaseModel):
 class SandboxActor:
     """Isolated sandbox environment using Podman container."""
 
-    def __init__(self, sandbox_id: str, config: Dict[str, Any]):
+    def __init__(self, sandbox_id: str, config: dict[str, Any]):
         self.sandbox_id = sandbox_id
         self.config = config
         self.status = "initializing"
@@ -93,14 +92,14 @@ class SandboxActor:
             self.status = "running"
         except Exception as e:
             self.status = "failed"
-            raise RuntimeError(f"Failed to start container: {str(e)}")
+            raise RuntimeError(f"Failed to start container: {str(e)}") from e
 
     def _start_executor_server(self):
         """Start the persistent Python executor server inside the container."""
         # Copy executor server script to container
         executor_script = os.path.join(os.path.dirname(__file__), "executor_server.py")
 
-        with open(executor_script, 'r') as f:
+        with open(executor_script) as f:
             script_content = f.read()
 
         # Write script to container using exec
@@ -123,7 +122,7 @@ class SandboxActor:
             bufsize=1
         )
 
-    def execute(self, code: str) -> Dict[str, Any]:
+    def execute(self, code: str) -> dict[str, Any]:
         """Execute Python code in the sandbox container using persistent executor."""
         start_time = time.time()
 
@@ -160,7 +159,7 @@ class SandboxActor:
                 "execution_time_ms": execution_time
             }
 
-    def install_packages(self, packages: List[str]) -> Dict[str, Any]:
+    def install_packages(self, packages: list[str]) -> dict[str, Any]:
         """Install Python packages in the sandbox container."""
         if not packages:
             return {"success": True, "installed": []}
@@ -199,7 +198,7 @@ class SandboxActor:
                 "execution_time_ms": execution_time
             }
 
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         """Get sandbox information."""
         return {
             "sandbox_id": self.sandbox_id,
@@ -217,7 +216,7 @@ class SandboxActor:
                     self.executor_process.stdin.write(json.dumps({"code": "__EXIT__"}) + "\n")
                     self.executor_process.stdin.flush()
                     self.executor_process.wait(timeout=2)
-                except:
+                except Exception:
                     self.executor_process.kill()
 
             # Stop and remove container
