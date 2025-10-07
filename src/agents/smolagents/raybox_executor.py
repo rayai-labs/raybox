@@ -1,7 +1,7 @@
 """
 Raybox Executor - HTTP Client for Raybox API
 
-This executor connects to Raybox API server via HTTP (no Ray dependency required).
+This executor uses Raybox API for remote execution in a sandbox
 """
 
 import os
