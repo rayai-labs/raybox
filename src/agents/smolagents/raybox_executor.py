@@ -34,7 +34,7 @@ class RayboxExecutor(RemotePythonExecutor):
         config = {
             "memory_limit_mb": kwargs.get("memory_limit_mb", 512),
             "cpu_limit": kwargs.get("cpu_limit", 1.0),
-            "timeout": kwargs.get("timeout", 300)
+            "timeout": kwargs.get("timeout", 300),
         }
 
         response = self.session.post(f"{self.api_url}/sandboxes", json=config, timeout=300)
@@ -60,7 +60,7 @@ class RayboxExecutor(RemotePythonExecutor):
         response = self.session.post(
             f"{self.api_url}/sandboxes/{self.sandbox_id}/packages",
             json=additional_imports,
-            timeout=300
+            timeout=300,
         )
         response.raise_for_status()
         result = response.json()
@@ -70,7 +70,9 @@ class RayboxExecutor(RemotePythonExecutor):
             self.logger.log(f"Installed packages: {', '.join(installed)}", level=31)
             return installed
         else:
-            self.logger.log(f"Failed to install packages: {result.get('error', 'Unknown error')}", level=40)
+            self.logger.log(
+                f"Failed to install packages: {result.get('error', 'Unknown error')}", level=40
+            )
             return []
 
     def send_tools(self, tools):
@@ -86,9 +88,7 @@ class RayboxExecutor(RemotePythonExecutor):
 
         # Execute code via HTTP API
         response = self.session.post(
-            f"{self.api_url}/sandboxes/{self.sandbox_id}/execute",
-            json={"code": code},
-            timeout=300
+            f"{self.api_url}/sandboxes/{self.sandbox_id}/execute", json={"code": code}, timeout=300
         )
         response.raise_for_status()
         result = response.json()
@@ -108,14 +108,14 @@ class RayboxExecutor(RemotePythonExecutor):
                 return CodeOutput(output=final_answer, logs=execution_logs, is_final_answer=True)
             except Exception:
                 # If we can't decode it, just return the raw data
-                return CodeOutput(output=final_answer_data, logs=execution_logs, is_final_answer=True)
+                return CodeOutput(
+                    output=final_answer_data, logs=execution_logs, is_final_answer=True
+                )
 
         # Handle errors (but not if it's a final answer)
         if result["error"]:
             error_message = (
-                f"{execution_logs}\n"
-                f"Executing code yielded an error:\n"
-                f"{result['error']}"
+                f"{execution_logs}\n" f"Executing code yielded an error:\n" f"{result['error']}"
             )
             raise AgentError(error_message, self.logger)
 

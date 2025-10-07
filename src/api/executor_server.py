@@ -20,13 +20,7 @@ def execute_code(code: str, namespace: dict) -> dict:
     sys.stdout = stdout_capture
     sys.stderr = stderr_capture
 
-    result = {
-        "stdout": "",
-        "stderr": "",
-        "error": None,
-        "exit_code": 0,
-        "is_final_answer": False
-    }
+    result = {"stdout": "", "stderr": "", "error": None, "exit_code": 0, "is_final_answer": False}
 
     try:
         # Execute in the persistent namespace
@@ -84,7 +78,7 @@ def main():
                 "stdout": "",
                 "stderr": "",
                 "error": f"Server error: {traceback.format_exc()}",
-                "exit_code": 1
+                "exit_code": 1,
             }
             print(json.dumps(error_result), flush=True)
 

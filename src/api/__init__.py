@@ -1,4 +1,5 @@
 """Raybox API module"""
+
 from .sandbox import (
     CodeExecutionRequest,
     ExecutionResult,
@@ -7,4 +8,10 @@ from .sandbox import (
     SandboxInfo,
 )
 
-__all__ = ["SandboxActor", "SandboxCreateRequest", "CodeExecutionRequest", "SandboxInfo", "ExecutionResult"]
+__all__ = [
+    "SandboxActor",
+    "SandboxCreateRequest",
+    "CodeExecutionRequest",
+    "SandboxInfo",
+    "ExecutionResult",
+]

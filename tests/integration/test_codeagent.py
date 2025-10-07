@@ -36,17 +36,11 @@ def model(anthropic_api_key):
 def agent(model):
     """Create CodeAgent with RayboxExecutor."""
     agent = CodeAgent(
-        tools=[WebSearchTool()],
-        model=model,
-        executor_type="local",
-        stream_outputs=True
+        tools=[WebSearchTool()], model=model, executor_type="local", stream_outputs=True
     )
 
     # Replace with Raybox executor
-    agent.python_executor = RayboxExecutor(
-        additional_imports=[],
-        logger=agent.logger
-    )
+    agent.python_executor = RayboxExecutor(additional_imports=[], logger=agent.logger)
 
     return agent
 

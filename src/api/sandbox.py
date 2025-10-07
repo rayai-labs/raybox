@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 
 class SandboxCreateRequest(BaseModel):
     """Request to create a new sandbox."""
+
     timeout: int = Field(default=300, description="Execution timeout in seconds")
     memory_limit_mb: int = Field(default=512, description="Memory limit in MB")
     cpu_limit: float = Field(default=1.0, description="CPU cores limit")
@@ -23,11 +24,13 @@ class SandboxCreateRequest(BaseModel):
 
 class CodeExecutionRequest(BaseModel):
     """Request to execute code in a sandbox."""
+
     code: str = Field(..., description="Python code to execute")
 
 
 class SandboxInfo(BaseModel):
     """Sandbox information response."""
+
     sandbox_id: str
     status: str
     created_at: str
@@ -35,6 +38,7 @@ class SandboxInfo(BaseModel):
 
 class ExecutionResult(BaseModel):
     """Code execution result."""
+
     stdout: str = ""
     stderr: str = ""
     error: str | None = None
@@ -57,10 +61,10 @@ class SandboxActor:
 
         # Set CONTAINER_HOST for Podman if not already set
         # This ensures Ray workers can connect to Podman
-        if not os.environ.get('CONTAINER_HOST'):
+        if not os.environ.get("CONTAINER_HOST"):
             podman_sock = os.path.expanduser("~/.local/share/containers/podman/machine/podman.sock")
             if os.path.exists(podman_sock):
-                os.environ['CONTAINER_HOST'] = f"unix://{podman_sock}"
+                os.environ["CONTAINER_HOST"] = f"unix://{podman_sock}"
 
         # Use from_env() to auto-detect Podman socket from environment
         # Falls back to default Podman socket locations
@@ -85,9 +89,9 @@ class SandboxActor:
                 name=self.container_name,
                 detach=True,
                 mem_limit=f"{self.config.get('memory_limit_mb', 512)}m",
-                cpu_quota=int(self.config.get('cpu_limit', 1.0) * 100000),
+                cpu_quota=int(self.config.get("cpu_limit", 1.0) * 100000),
                 network_mode="bridge",  # allow network for package installation
-                remove=False
+                remove=False,
             )
             self.status = "running"
         except Exception as e:
@@ -103,7 +107,9 @@ class SandboxActor:
             script_content = f.read()
 
         # Write script to container using exec
-        write_cmd = f"cat > /tmp/executor_server.py << 'EXECUTOR_EOF'\n{script_content}\nEXECUTOR_EOF"
+        write_cmd = (
+            f"cat > /tmp/executor_server.py << 'EXECUTOR_EOF'\n{script_content}\nEXECUTOR_EOF"
+        )
         self.container.exec_run(cmd=["sh", "-c", write_cmd])
 
         # Start the executor server in background using subprocess with podman exec
@@ -119,7 +125,7 @@ class SandboxActor:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            bufsize=1
+            bufsize=1,
         )
 
     def execute(self, code: str) -> dict[str, Any]:
@@ -145,7 +151,7 @@ class SandboxActor:
                 "is_final_answer": result.get("is_final_answer", False),
                 "final_answer_data": result.get("final_answer_data"),
                 "results": [],
-                "execution_time_ms": execution_time
+                "execution_time_ms": execution_time,
             }
 
         except Exception as e:
@@ -156,7 +162,7 @@ class SandboxActor:
                 "error": str(e),
                 "is_final_answer": False,
                 "results": [],
-                "execution_time_ms": execution_time
+                "execution_time_ms": execution_time,
             }
 
     def install_packages(self, packages: list[str]) -> dict[str, Any]:
@@ -171,7 +177,11 @@ class SandboxActor:
             exit_code, output = self.container.exec_run(
                 cmd=["pip", "install", "--root-user-action=ignore"] + packages
             )
-            output_str = output.decode('utf-8', errors='replace') if isinstance(output, bytes) else str(output)
+            output_str = (
+                output.decode("utf-8", errors="replace")
+                if isinstance(output, bytes)
+                else str(output)
+            )
             execution_time = (time.time() - start_time) * 1000
 
             if exit_code == 0:
@@ -181,22 +191,14 @@ class SandboxActor:
                     "success": True,
                     "installed": packages,
                     "output": output_str,
-                    "execution_time_ms": execution_time
+                    "execution_time_ms": execution_time,
                 }
             else:
-                return {
-                    "success": False,
-                    "error": output_str,
-                    "execution_time_ms": execution_time
-                }
+                return {"success": False, "error": output_str, "execution_time_ms": execution_time}
 
         except Exception as e:
             execution_time = (time.time() - start_time) * 1000
-            return {
-                "success": False,
-                "error": str(e),
-                "execution_time_ms": execution_time
-            }
+            return {"success": False, "error": str(e), "execution_time_ms": execution_time}
 
     def get_info(self) -> dict[str, Any]:
         """Get sandbox information."""
@@ -204,7 +206,7 @@ class SandboxActor:
             "sandbox_id": self.sandbox_id,
             "status": self.status,
             "created_at": self.created_at,
-            "container_name": self.container_name
+            "container_name": self.container_name,
         }
 
     def terminate(self):

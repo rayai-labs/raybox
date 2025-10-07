@@ -21,11 +21,7 @@ def ray_context():
 @pytest.fixture(scope="module")
 def sandbox_config():
     """Sandbox configuration."""
-    return {
-        "memory_limit_mb": 512,
-        "cpu_limit": 1.0,
-        "timeout": 300
-    }
+    return {"memory_limit_mb": 512, "cpu_limit": 1.0, "timeout": 300}
 
 
 @pytest.fixture(scope="module")

@@ -19,16 +19,11 @@ from .sandbox import (
 
 # FastAPI app
 app = FastAPI(
-    title="Raybox API",
-    description="Secure code execution sandboxes via HTTP",
-    version="0.1.0"
+    title="Raybox API", description="Secure code execution sandboxes via HTTP", version="0.1.0"
 )
 
 
-@serve.deployment(
-    num_replicas=1,
-    ray_actor_options={"num_cpus": 0.1}
-)
+@serve.deployment(num_replicas=1, ray_actor_options={"num_cpus": 0.1})
 @serve.ingress(app)
 class RayboxAPI:
     """Raybox HTTP API served by Ray Serve."""
@@ -40,11 +35,7 @@ class RayboxAPI:
     @app.get("/health")
     async def health_check(self):
         """Health check endpoint."""
-        return {
-            "status": "healthy",
-            "service": "raybox-api",
-            "version": "0.1.0"
-        }
+        return {"status": "healthy", "service": "raybox-api", "version": "0.1.0"}
 
     @app.post("/sandboxes", response_model=SandboxInfo)
     async def create_sandbox(self, request: SandboxCreateRequest):
@@ -54,7 +45,7 @@ class RayboxAPI:
         config = {
             "memory_limit_mb": request.memory_limit_mb,
             "cpu_limit": request.cpu_limit,
-            "timeout": request.timeout
+            "timeout": request.timeout,
         }
 
         # Create Ray actor for this sandbox
@@ -64,9 +55,7 @@ class RayboxAPI:
         self.sandboxes[sandbox_id] = sandbox_actor
 
         return SandboxInfo(
-            sandbox_id=sandbox_id,
-            status="running",
-            created_at=datetime.utcnow().isoformat()
+            sandbox_id=sandbox_id, status="running", created_at=datetime.utcnow().isoformat()
         )
 
     @app.post("/sandboxes/{sandbox_id}/execute", response_model=ExecutionResult)

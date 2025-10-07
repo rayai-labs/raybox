@@ -26,11 +26,7 @@ def api_client(api_url):
 @pytest.fixture
 def sandbox_id(api_client, api_url):
     """Create a sandbox and return its ID."""
-    config = {
-        "memory_limit_mb": 512,
-        "cpu_limit": 1.0,
-        "timeout": 300
-    }
+    config = {"memory_limit_mb": 512, "cpu_limit": 1.0, "timeout": 300}
 
     response = api_client.post(f"{api_url}/sandboxes", json=config)
     response.raise_for_status()
@@ -59,11 +55,7 @@ def test_health_check(api_client, api_url):
 
 def test_create_sandbox(api_client, api_url):
     """Test sandbox creation."""
-    config = {
-        "memory_limit_mb": 512,
-        "cpu_limit": 1.0,
-        "timeout": 300
-    }
+    config = {"memory_limit_mb": 512, "cpu_limit": 1.0, "timeout": 300}
 
     response = api_client.post(f"{api_url}/sandboxes", json=config)
     response.raise_for_status()
@@ -82,10 +74,7 @@ def test_execute_code(api_client, api_url, sandbox_id):
     """Test code execution."""
     code = 'x = 42\nprint(f"x = {x}")'
 
-    response = api_client.post(
-        f"{api_url}/sandboxes/{sandbox_id}/execute",
-        json={"code": code}
-    )
+    response = api_client.post(f"{api_url}/sandboxes/{sandbox_id}/execute", json={"code": code})
     response.raise_for_status()
 
     data = response.json()
@@ -99,10 +88,7 @@ def test_stateful_execution(api_client, api_url, sandbox_id):
     """Test that variables persist between executions."""
     # Step 1: Define variable x
     code1 = 'x = 42\nprint(f"x = {x}")'
-    response1 = api_client.post(
-        f"{api_url}/sandboxes/{sandbox_id}/execute",
-        json={"code": code1}
-    )
+    response1 = api_client.post(f"{api_url}/sandboxes/{sandbox_id}/execute", json={"code": code1})
     response1.raise_for_status()
     data1 = response1.json()
 
@@ -111,10 +97,7 @@ def test_stateful_execution(api_client, api_url, sandbox_id):
 
     # Step 2: Use variable x (should persist)
     code2 = 'print(f"x is still {x}")\ny = x * 2\nprint(f"y = {y}")'
-    response2 = api_client.post(
-        f"{api_url}/sandboxes/{sandbox_id}/execute",
-        json={"code": code2}
-    )
+    response2 = api_client.post(f"{api_url}/sandboxes/{sandbox_id}/execute", json={"code": code2})
     response2.raise_for_status()
     data2 = response2.json()
 
@@ -127,10 +110,7 @@ def test_install_packages(api_client, api_url, sandbox_id):
     """Test package installation."""
     packages = ["requests", "numpy"]
 
-    response = api_client.post(
-        f"{api_url}/sandboxes/{sandbox_id}/packages",
-        json=packages
-    )
+    response = api_client.post(f"{api_url}/sandboxes/{sandbox_id}/packages", json=packages)
     response.raise_for_status()
 
     data = response.json()
@@ -153,11 +133,7 @@ def test_get_sandbox_info(api_client, api_url, sandbox_id):
 def test_delete_sandbox(api_client, api_url):
     """Test sandbox deletion."""
     # Create a sandbox
-    config = {
-        "memory_limit_mb": 512,
-        "cpu_limit": 1.0,
-        "timeout": 300
-    }
+    config = {"memory_limit_mb": 512, "cpu_limit": 1.0, "timeout": 300}
 
     create_response = api_client.post(f"{api_url}/sandboxes", json=config)
     create_response.raise_for_status()
