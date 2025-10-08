@@ -1,6 +1,14 @@
-MIT License
+MIT License (SDK Only)
 
 Copyright (c) 2025 RayAI Technologies Inc.
+
+IMPORTANT: This MIT license applies ONLY to the Raybox Python SDK code
+located in the /src/raybox/sdk/ directory.
+
+The server code located in the /ee/ directory is licensed separately under
+a proprietary license. See ee/LICENSE for details.
+
+---
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

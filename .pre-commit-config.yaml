@@ -19,3 +19,4 @@ repos:
         additional_dependencies:
           - types-requests>=2.32.0
         args: [--ignore-missing-imports, --check-untyped-defs]
+        exclude: ^ee/
