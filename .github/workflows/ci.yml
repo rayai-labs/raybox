@@ -68,9 +68,9 @@ jobs:
 
       - name: Verify sqlc generated code is up-to-date
         run: |
-          cd ee/supabase
+          cd ee
           sqlc generate
-          git diff --exit-code ../raybox/api/db/
+          git diff --exit-code raybox/api/db/
 
   all-checks:
     name: All Checks Passed

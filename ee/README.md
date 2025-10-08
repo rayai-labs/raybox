@@ -32,7 +32,7 @@ If you have a valid Raybox Enterprise license, follow these setup instructions:
 uv sync
 
 # Setup database
-cd ee/supabase
+cd ee
 supabase init
 supabase link --project-ref <your-project-ref>
 supabase db push
@@ -51,11 +51,11 @@ uv run raybox-server
 
 ```bash
 # After SQL changes
-cd ee/supabase && sqlc generate
+cd ee && sqlc generate
 
 # After schema changes
-cd ee/supabase && supabase migration new <name>
-cd ee/supabase && supabase db push
+cd ee && supabase migration new <name>
+cd ee && supabase db push
 ```
 
 ## Getting a License

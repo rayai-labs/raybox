@@ -41,7 +41,11 @@ CREATE INDEX idx_api_keys_user_id ON api_keys(user_id);
 
 -- Function to clean up expired device codes (run periodically)
 CREATE OR REPLACE FUNCTION cleanup_expired_device_codes()
-RETURNS INTEGER AS $$
+RETURNS INTEGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 DECLARE
     deleted_count INTEGER;
 BEGIN
@@ -51,7 +55,7 @@ BEGIN
     GET DIAGNOSTICS deleted_count = ROW_COUNT;
     RETURN deleted_count;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 -- Optional: Set up RLS (Row Level Security) policies
 ALTER TABLE device_codes ENABLE ROW LEVEL SECURITY;
