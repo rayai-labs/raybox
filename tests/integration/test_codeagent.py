@@ -1,10 +1,28 @@
-"""Integration test for CodeAgent with RayboxExecutor"""
+"""Integration test for RayboxExecutor with smolagents"""
 
 import os
+from unittest.mock import MagicMock
 
 import pytest
-from agents.smolagents.raybox_executor import RayboxExecutor
-from smolagents import CodeAgent, LiteLLMModel, WebSearchTool
+import ray
+
+from examples.codeagent_smolagent import RayboxExecutor
+
+
+@pytest.fixture(scope="module")
+def ray_context():
+    """Initialize Ray for tests."""
+    ray.init(ignore_reinit_error=True)
+    yield
+    ray.shutdown()
+
+
+@pytest.fixture
+def smolagents_logger():
+    """Create a logger compatible with smolagents."""
+    logger = MagicMock()
+    logger.log = MagicMock()
+    return logger
 
 
 @pytest.fixture
@@ -13,51 +31,85 @@ def api_url():
     return os.getenv("RAYBOX_API_URL", "http://localhost:8000")
 
 
-@pytest.fixture
-def anthropic_api_key():
-    """Get Anthropic API key from environment."""
-    api_key = os.getenv("ANTHROPIC_API_KEY")
-    if not api_key:
-        pytest.skip("ANTHROPIC_API_KEY not set")
-    return api_key
+@pytest.mark.integration
+def test_raybox_executor_basic_execution(ray_context, smolagents_logger, api_url):
+    """Test RayboxExecutor can execute basic Python code via real Raybox API."""
+    # Create executor (this will create a real sandbox via API)
+    executor = RayboxExecutor(additional_imports=[], logger=smolagents_logger, api_url=api_url)
 
+    try:
+        # Execute simple math code
+        result = executor.run_code_raise_errors("x = 10\ny = 20\nprint(x + y)")
 
-@pytest.fixture
-def model(anthropic_api_key):
-    """Create LiteLLM model with Anthropic."""
-    return LiteLLMModel(
-        model_id="claude-3-5-haiku-20241022",
-        api_key=anthropic_api_key,
-    )
+        # Verify execution
+        assert result is not None
+        assert "30" in result.logs
+        assert result.is_final_answer is False
 
-
-@pytest.fixture
-def agent(model):
-    """Create CodeAgent with RayboxExecutor."""
-    agent = CodeAgent(
-        tools=[WebSearchTool()], model=model, executor_type="local", stream_outputs=True
-    )
-
-    # Replace with Raybox executor
-    agent.python_executor = RayboxExecutor(additional_imports=[], logger=agent.logger)
-
-    return agent
+    finally:
+        # Clean up sandbox
+        executor.cleanup()
 
 
 @pytest.mark.integration
-def test_codeagent_with_raybox(agent):
-    """Test that CodeAgent can run with RayboxExecutor."""
-    result = agent.run("What is 15 * 23?")
+def test_raybox_executor_with_package_installation(ray_context, smolagents_logger, api_url):
+    """Test RayboxExecutor can install packages and use them."""
+    # Create executor with package installation
+    executor = RayboxExecutor(
+        additional_imports=["requests"], logger=smolagents_logger, api_url=api_url
+    )
 
-    assert result is not None
-    assert "345" in str(result)
+    try:
+        # Verify package was installed by importing it
+        result = executor.run_code_raise_errors(
+            "import requests\nprint(f'requests version: {requests.__version__}')"
+        )
+
+        # Verify execution
+        assert result is not None
+        assert "requests version:" in result.logs
+
+    finally:
+        # Clean up sandbox
+        executor.cleanup()
 
 
 @pytest.mark.integration
-def test_codeagent_with_web_search(agent):
-    """Test that CodeAgent can use web search and execute code in Raybox."""
-    result = agent.run(
-        "How many seconds would it take for a leopard at full speed to run through Pont des Arts?"
-    )
+def test_raybox_executor_stateful_execution(ray_context, smolagents_logger, api_url):
+    """Test RayboxExecutor maintains state between executions."""
+    # Create executor
+    executor = RayboxExecutor(additional_imports=[], logger=smolagents_logger, api_url=api_url)
 
-    assert result is not None
+    try:
+        # First execution - define a variable
+        result1 = executor.run_code_raise_errors("my_var = 42\nprint(f'Set my_var = {my_var}')")
+        assert "Set my_var = 42" in result1.logs
+
+        # Second execution - use the variable from previous execution
+        result2 = executor.run_code_raise_errors("print(f'my_var is still {my_var}')")
+        assert "my_var is still 42" in result2.logs
+
+    finally:
+        # Clean up sandbox
+        executor.cleanup()
+
+
+@pytest.mark.integration
+def test_raybox_executor_error_handling(ray_context, smolagents_logger, api_url):
+    """Test RayboxExecutor properly handles execution errors."""
+    from smolagents import AgentError
+
+    # Create executor
+    executor = RayboxExecutor(additional_imports=[], logger=smolagents_logger, api_url=api_url)
+
+    try:
+        # Execute code with an error
+        with pytest.raises(AgentError) as exc_info:
+            executor.run_code_raise_errors("print(undefined_variable)")
+
+        # Verify error message contains the NameError
+        assert "NameError" in str(exc_info.value) or "undefined_variable" in str(exc_info.value)
+
+    finally:
+        # Clean up sandbox
+        executor.cleanup()

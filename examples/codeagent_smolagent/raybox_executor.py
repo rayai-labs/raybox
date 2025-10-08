@@ -114,9 +114,7 @@ class RayboxExecutor(RemotePythonExecutor):
 
         # Handle errors (but not if it's a final answer)
         if result["error"]:
-            error_message = (
-                f"{execution_logs}\n" f"Executing code yielded an error:\n" f"{result['error']}"
-            )
+            error_message = f"{execution_logs}\nExecuting code yielded an error:\n{result['error']}"
             raise AgentError(error_message, self.logger)
 
         # Return successful execution
