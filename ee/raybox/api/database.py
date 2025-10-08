@@ -40,11 +40,16 @@ class Database:
                 "Use: postgresql://...pooler.supabase.com:6543/postgres"
             )
 
+        # Pool configuration with environment variable overrides
+        min_pool_size = int(os.getenv("DB_POOL_MIN_SIZE", "5"))
+        max_pool_size = int(os.getenv("DB_POOL_MAX_SIZE", "20"))
+        command_timeout = int(os.getenv("DB_COMMAND_TIMEOUT", "60"))
+
         self.pool = await asyncpg.create_pool(
             db_url,
-            min_size=5,
-            max_size=20,
-            command_timeout=60,
+            min_size=min_pool_size,
+            max_size=max_pool_size,
+            command_timeout=command_timeout,
         )
 
     async def disconnect(self) -> None:

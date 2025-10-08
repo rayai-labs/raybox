@@ -29,8 +29,8 @@ CREATE TABLE IF NOT EXISTS api_keys (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     expires_at TIMESTAMPTZ, -- NULL = never expires
 
-    -- Ensure key_hash is bcrypt or SHA-256
-    CONSTRAINT key_hash_length CHECK (length(key_hash) >= 32)
+    -- Ensure key_hash is bcrypt (60 chars) or SHA-256 hex (64 chars)
+    CONSTRAINT key_hash_length CHECK (length(key_hash) = 60 OR length(key_hash) = 64)
 );
 
 -- Index for fast API key lookups during authentication

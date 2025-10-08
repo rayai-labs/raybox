@@ -41,7 +41,8 @@ supabase db push
 sqlc generate
 
 # Configure environment
-export SUPABASE_DB_URL="postgresql://...pooler.supabase.com:6543/postgres"
+# Create .env file in ee/ directory:
+echo 'SUPABASE_DB_URL="postgresql://...pooler.supabase.com:6543/postgres"' > .env
 
 # Start server
 uv run raybox-server
