@@ -29,7 +29,8 @@ dev = [
 ]
 
 [project.scripts]
-raybox = "raybox.api.cli:main"
+raybox = "raybox.sdk.python.cli:main"
+raybox-server = "ee.raybox.api.cli:main"
 
 [tool.black]
 line-length = 100
@@ -76,7 +77,7 @@ ignore = [
 known-first-party = ["raybox"]
 
 [tool.setuptools]
-package-dir = {"" = "src"}
+package-dir = {"raybox" = "src/raybox", "ee" = "ee"}
 
 [tool.setuptools.packages.find]
-where = ["src"]
+include = ["raybox*", "ee*"]

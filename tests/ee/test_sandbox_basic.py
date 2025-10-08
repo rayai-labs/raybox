@@ -7,7 +7,7 @@ import uuid
 import pytest
 import ray
 
-from raybox.api.sandbox import SandboxActor
+from ee.raybox.api.sandbox import SandboxActor
 
 
 @pytest.fixture(scope="module")
