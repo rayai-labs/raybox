@@ -9,6 +9,12 @@ install:  ## Install dependencies
 test:  ## Run unit tests
 	uv run pytest
 
+test-sdk-python:  ## Run Python SDK tests
+	uv run pytest tests/sdk/python/
+
+test-sdk-python-integration:  ## Run Python SDK integration tests (requires API server)
+	uv run pytest tests/sdk/python/test_integration.py -m integration
+
 test-all:  ## Run all tests (including integration)
 	uv run pytest tests/ --ignore=
 

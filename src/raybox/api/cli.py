@@ -13,7 +13,7 @@ def main():
     print("Starting Raybox API Server on http://0.0.0.0:8000")
 
     try:
-        subprocess.run(["serve", "run", "src.api.server:raybox_api", "--reload"], check=True)
+        subprocess.run(["serve", "run", "raybox.api.server:raybox_api", "--reload"], check=True)
     except KeyboardInterrupt:
         print("\n✅ Raybox stopped")
         sys.exit(0)
