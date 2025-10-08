@@ -7,7 +7,7 @@ import uuid
 import pytest
 import ray
 
-from api.sandbox import SandboxActor
+from raybox.api.sandbox import SandboxActor
 
 
 @pytest.fixture(scope="module")
@@ -28,7 +28,7 @@ def sandbox_config():
 def sandbox_actor(ray_context, sandbox_config):
     """Create a sandbox actor for testing (shared across all tests in module)."""
     sandbox_id = str(uuid.uuid4())
-    actor = SandboxActor.remote(sandbox_id, sandbox_config)
+    actor = SandboxActor.remote(sandbox_id, sandbox_config)  # type: ignore[attr-defined]
     yield actor
     # Cleanup
     ray.get(actor.terminate.remote())
