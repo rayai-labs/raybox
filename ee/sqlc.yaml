@@ -6,7 +6,7 @@ plugins:
       sha256: fbedae96b5ecae2380a70fb5b925fd4bff58a6cfb1f3140375d098fbab7b3a3c
 sql:
   - schema: "supabase/migrations/*.sql"
-    queries: "queries.sql"
+    queries: "supabase/queries/*.sql"
     engine: "postgresql"
     codegen:
       - out: "raybox/api/db"

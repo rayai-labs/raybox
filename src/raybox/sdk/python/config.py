@@ -47,9 +47,13 @@ class RayboxConfig:
         if not self.config_file.exists():
             return {}
 
-        with open(self.config_file) as f:
-            result: dict[str, Any] = json.load(f)
-            return result
+        try:
+            with open(self.config_file) as f:
+                result: dict[str, Any] = json.load(f)
+                return result
+        except (json.JSONDecodeError, OSError):
+            # If config is malformed, return empty dict
+            return {}
 
     def get_api_key(self) -> str | None:
         """Get stored API key.

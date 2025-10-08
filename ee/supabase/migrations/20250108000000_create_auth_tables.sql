@@ -43,7 +43,7 @@ CREATE INDEX idx_api_keys_user_id ON api_keys(user_id);
 CREATE OR REPLACE FUNCTION cleanup_expired_device_codes()
 RETURNS INTEGER
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY INVOKER
 SET search_path = public
 AS $$
 DECLARE
@@ -71,7 +71,8 @@ CREATE POLICY "Anyone can create device codes"
     ON device_codes FOR INSERT
     WITH CHECK (true);
 
--- Policy: Users can approve their own device codes
+-- Policy: Users can approve device codes when they authenticate
 CREATE POLICY "Users can approve device codes"
     ON device_codes FOR UPDATE
-    USING (auth.uid() = user_id);
+    USING (user_id IS NULL OR auth.uid() = user_id)
+    WITH CHECK (auth.uid() = user_id);

@@ -1,5 +1,6 @@
 """Raybox CLI for authentication and management."""
 
+import getpass
 import sys
 import webbrowser
 
@@ -27,7 +28,7 @@ def login(api_url: str | None = None) -> None:
         print(f"\nPlease manually visit: {base_url}/login")
 
     print("\n" + "=" * 60)
-    api_key = input("Paste your API key here: ").strip()
+    api_key = getpass.getpass("Paste your API key here (hidden): ").strip()
 
     if not api_key:
         print("❌ No API key provided. Authentication cancelled.")
