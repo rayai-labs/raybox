@@ -12,7 +12,7 @@ sql:
       - out: "raybox/api/db"
         plugin: py
         options:
-          package: "db"
+          package: "ee.raybox.api.db"
           emit_pydantic_models: true
           emit_async_querier: true
           emit_sync_querier: false

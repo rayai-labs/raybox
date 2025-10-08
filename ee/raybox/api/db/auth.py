@@ -8,7 +8,8 @@ from collections.abc import AsyncIterator
 
 import sqlalchemy
 import sqlalchemy.ext.asyncio
-from db import models
+
+from ee.raybox.api.db import models
 
 APPROVE_DEVICE_CODE = """-- name: approve_device_code \\:one
 UPDATE device_codes
