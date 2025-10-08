@@ -3,13 +3,14 @@
 #   sqlc v1.30.0
 # source: auth.sql
 import datetime
+from typing import AsyncIterator, Optional
 import uuid
-from collections.abc import AsyncIterator
 
 import sqlalchemy
 import sqlalchemy.ext.asyncio
 
 from ee.raybox.api.db import models
+
 
 APPROVE_DEVICE_CODE = """-- name: approve_device_code \\:one
 UPDATE device_codes
@@ -91,14 +92,8 @@ class AsyncQuerier:
     def __init__(self, conn: sqlalchemy.ext.asyncio.AsyncConnection):
         self._conn = conn
 
-    async def approve_device_code(
-        self, *, user_id: uuid.UUID | None, user_code: str
-    ) -> models.DeviceCode | None:
-        row = (
-            await self._conn.execute(
-                sqlalchemy.text(APPROVE_DEVICE_CODE), {"p1": user_id, "p2": user_code}
-            )
-        ).first()
+    async def approve_device_code(self, *, user_id: Optional[uuid.UUID], user_code: str) -> Optional[models.DeviceCode]:
+        row = (await self._conn.execute(sqlalchemy.text(APPROVE_DEVICE_CODE), {"p1": user_id, "p2": user_code})).first()
         if row is None:
             return None
         return models.DeviceCode(
@@ -114,20 +109,13 @@ class AsyncQuerier:
     async def cleanup_expired_device_codes(self) -> None:
         await self._conn.execute(sqlalchemy.text(CLEANUP_EXPIRED_DEVICE_CODES))
 
-    async def create_api_key(
-        self, *, user_id: uuid.UUID, key_hash: str, key_prefix: str, name: str
-    ) -> models.ApiKey | None:
-        row = (
-            await self._conn.execute(
-                sqlalchemy.text(CREATE_API_KEY),
-                {
-                    "p1": user_id,
-                    "p2": key_hash,
-                    "p3": key_prefix,
-                    "p4": name,
-                },
-            )
-        ).first()
+    async def create_api_key(self, *, user_id: uuid.UUID, key_hash: str, key_prefix: str, name: str) -> Optional[models.ApiKey]:
+        row = (await self._conn.execute(sqlalchemy.text(CREATE_API_KEY), {
+            "p1": user_id,
+            "p2": key_hash,
+            "p3": key_prefix,
+            "p4": name,
+        })).first()
         if row is None:
             return None
         return models.ApiKey(
@@ -141,15 +129,8 @@ class AsyncQuerier:
             expires_at=row[7],
         )
 
-    async def create_device_code(
-        self, *, device_code: uuid.UUID, user_code: str, expires_at: datetime.datetime
-    ) -> models.DeviceCode | None:
-        row = (
-            await self._conn.execute(
-                sqlalchemy.text(CREATE_DEVICE_CODE),
-                {"p1": device_code, "p2": user_code, "p3": expires_at},
-            )
-        ).first()
+    async def create_device_code(self, *, device_code: uuid.UUID, user_code: str, expires_at: datetime.datetime) -> Optional[models.DeviceCode]:
+        row = (await self._conn.execute(sqlalchemy.text(CREATE_DEVICE_CODE), {"p1": device_code, "p2": user_code, "p3": expires_at})).first()
         if row is None:
             return None
         return models.DeviceCode(
@@ -165,10 +146,8 @@ class AsyncQuerier:
     async def delete_api_key(self, *, id: uuid.UUID, user_id: uuid.UUID) -> None:
         await self._conn.execute(sqlalchemy.text(DELETE_API_KEY), {"p1": id, "p2": user_id})
 
-    async def get_api_key_by_hash(self, *, key_hash: str) -> models.ApiKey | None:
-        row = (
-            await self._conn.execute(sqlalchemy.text(GET_API_KEY_BY_HASH), {"p1": key_hash})
-        ).first()
+    async def get_api_key_by_hash(self, *, key_hash: str) -> Optional[models.ApiKey]:
+        row = (await self._conn.execute(sqlalchemy.text(GET_API_KEY_BY_HASH), {"p1": key_hash})).first()
         if row is None:
             return None
         return models.ApiKey(
@@ -182,14 +161,8 @@ class AsyncQuerier:
             expires_at=row[7],
         )
 
-    async def get_device_code_by_device_code(
-        self, *, device_code: uuid.UUID
-    ) -> models.DeviceCode | None:
-        row = (
-            await self._conn.execute(
-                sqlalchemy.text(GET_DEVICE_CODE_BY_DEVICE_CODE), {"p1": device_code}
-            )
-        ).first()
+    async def get_device_code_by_device_code(self, *, device_code: uuid.UUID) -> Optional[models.DeviceCode]:
+        row = (await self._conn.execute(sqlalchemy.text(GET_DEVICE_CODE_BY_DEVICE_CODE), {"p1": device_code})).first()
         if row is None:
             return None
         return models.DeviceCode(
@@ -202,12 +175,8 @@ class AsyncQuerier:
             created_at=row[6],
         )
 
-    async def get_device_code_by_user_code(self, *, user_code: str) -> models.DeviceCode | None:
-        row = (
-            await self._conn.execute(
-                sqlalchemy.text(GET_DEVICE_CODE_BY_USER_CODE), {"p1": user_code}
-            )
-        ).first()
+    async def get_device_code_by_user_code(self, *, user_code: str) -> Optional[models.DeviceCode]:
+        row = (await self._conn.execute(sqlalchemy.text(GET_DEVICE_CODE_BY_USER_CODE), {"p1": user_code})).first()
         if row is None:
             return None
         return models.DeviceCode(

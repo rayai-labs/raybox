@@ -2,9 +2,9 @@
 # versions:
 #   sqlc v1.30.0
 import datetime
-import uuid
-
 import pydantic
+from typing import Optional
+import uuid
 
 
 class ApiKey(pydantic.BaseModel):
@@ -13,9 +13,9 @@ class ApiKey(pydantic.BaseModel):
     key_hash: str
     key_prefix: str
     name: str
-    last_used_at: datetime.datetime | None
+    last_used_at: Optional[datetime.datetime]
     created_at: datetime.datetime
-    expires_at: datetime.datetime | None
+    expires_at: Optional[datetime.datetime]
 
 
 class DeviceCode(pydantic.BaseModel):
@@ -23,6 +23,6 @@ class DeviceCode(pydantic.BaseModel):
     user_code: str
     verification_uri: str
     expires_at: datetime.datetime
-    user_id: uuid.UUID | None
+    user_id: Optional[uuid.UUID]
     approved: bool
     created_at: datetime.datetime
