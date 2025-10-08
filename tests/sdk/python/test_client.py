@@ -48,7 +48,7 @@ class TestSandboxInit:
 class TestSandboxContextManager:
     """Test Sandbox context manager functionality."""
 
-    @patch("sdk.python.client.requests.Session")
+    @patch("raybox.sdk.python.client.requests.Session")
     def test_enter_creates_sandbox(self, mock_session_class):
         """Test that __enter__ creates a sandbox."""
         mock_session = MagicMock()
@@ -68,7 +68,7 @@ class TestSandboxContextManager:
             assert call_args[1]["json"]["timeout"] == 300
             assert call_args[1]["json"]["memory_limit_mb"] == 512
 
-    @patch("sdk.python.client.requests.Session")
+    @patch("raybox.sdk.python.client.requests.Session")
     def test_enter_handles_api_error(self, mock_session_class):
         """Test that __enter__ handles API errors."""
         mock_session = MagicMock()
@@ -84,7 +84,7 @@ class TestSandboxContextManager:
 
         assert "Failed to create sandbox" in str(exc_info.value)
 
-    @patch("sdk.python.client.requests.Session")
+    @patch("raybox.sdk.python.client.requests.Session")
     def test_exit_deletes_sandbox(self, mock_session_class):
         """Test that __exit__ deletes the sandbox."""
         mock_session = MagicMock()
@@ -106,7 +106,7 @@ class TestSandboxContextManager:
         assert "test-sandbox-123" in call_args[0][0]
         mock_session.close.assert_called_once()
 
-    @patch("sdk.python.client.requests.Session")
+    @patch("raybox.sdk.python.client.requests.Session")
     def test_exit_handles_delete_error(self, mock_session_class):
         """Test that __exit__ handles delete errors gracefully."""
         mock_session = MagicMock()
@@ -133,7 +133,7 @@ class TestSandboxContextManager:
 class TestSandboxExecute:
     """Test Sandbox execute method."""
 
-    @patch("sdk.python.client.requests.Session")
+    @patch("raybox.sdk.python.client.requests.Session")
     def test_execute_success(self, mock_session_class):
         """Test successful code execution."""
         mock_session = MagicMock()
@@ -167,7 +167,7 @@ class TestSandboxExecute:
         assert result.success is True
         assert result.execution_time_ms == 42.5
 
-    @patch("sdk.python.client.requests.Session")
+    @patch("raybox.sdk.python.client.requests.Session")
     def test_execute_with_error(self, mock_session_class):
         """Test code execution with error."""
         mock_session = MagicMock()
@@ -206,7 +206,7 @@ class TestSandboxExecute:
 
         assert "not initialized" in str(exc_info.value)
 
-    @patch("sdk.python.client.requests.Session")
+    @patch("raybox.sdk.python.client.requests.Session")
     def test_execute_sandbox_not_found(self, mock_session_class):
         """Test execute with sandbox not found."""
         mock_session = MagicMock()
@@ -231,7 +231,7 @@ class TestSandboxExecute:
 class TestSandboxInstallPackages:
     """Test Sandbox install_packages method."""
 
-    @patch("sdk.python.client.requests.Session")
+    @patch("raybox.sdk.python.client.requests.Session")
     def test_install_packages_success(self, mock_session_class):
         """Test successful package installation."""
         mock_session = MagicMock()
@@ -260,7 +260,7 @@ class TestSandboxInstallPackages:
         assert len(result["installed"]) == 2
         assert "numpy" in result["installed"]
 
-    @patch("sdk.python.client.requests.Session")
+    @patch("raybox.sdk.python.client.requests.Session")
     def test_install_empty_packages(self, mock_session_class):
         """Test installing empty package list."""
         mock_session = MagicMock()
@@ -288,7 +288,7 @@ class TestSandboxInstallPackages:
 
         assert "not initialized" in str(exc_info.value)
 
-    @patch("sdk.python.client.requests.Session")
+    @patch("raybox.sdk.python.client.requests.Session")
     def test_install_packages_api_error(self, mock_session_class):
         """Test install_packages with API error."""
         mock_session = MagicMock()

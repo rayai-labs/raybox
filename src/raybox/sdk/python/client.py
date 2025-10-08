@@ -2,6 +2,7 @@
 Raybox Python SDK - Client implementation
 """
 
+import logging
 import os
 from typing import Any
 
@@ -9,6 +10,8 @@ import requests
 
 from .exceptions import APIError, SandboxCreationError, SandboxNotFoundError
 from .types import ExecutionResult
+
+logger = logging.getLogger(__name__)
 
 
 class Sandbox:
@@ -68,9 +71,8 @@ class Sandbox:
                     f"{self.api_url}/sandboxes/{self.sandbox_id}",
                     timeout=30,
                 )
-            except requests.exceptions.RequestException:
-                # Ignore errors during cleanup
-                pass
+            except requests.exceptions.RequestException as e:
+                logger.warning(f"Failed to delete sandbox {self.sandbox_id}: {e}")
             finally:
                 self.sandbox_id = None
                 self.session.close()
@@ -146,7 +148,7 @@ class Sandbox:
             response = self.session.post(
                 f"{self.api_url}/sandboxes/{self.sandbox_id}/packages",
                 json=packages,
-                timeout=300,
+                timeout=self.timeout,
             )
             response.raise_for_status()
             result: dict[str, Any] = response.json()
