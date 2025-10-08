@@ -21,7 +21,7 @@ def sandbox_actor(ray_context):
     """Create a sandbox actor for testing."""
     sandbox_id = str(uuid.uuid4())
     config = {"memory_limit_mb": 512, "cpu_limit": 1.0, "timeout": 300}
-    actor = SandboxActor.remote(sandbox_id, config)
+    actor = SandboxActor.remote(sandbox_id, config)  # type: ignore[attr-defined]
     yield actor
     # Cleanup
     ray.get(actor.terminate.remote())

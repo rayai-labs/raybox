@@ -7,7 +7,7 @@ from typing import Any
 
 import requests
 
-from .exceptions import APIError, ExecutionError, SandboxCreationError, SandboxNotFoundError
+from .exceptions import APIError, SandboxCreationError, SandboxNotFoundError
 from .types import ExecutionResult
 
 
@@ -149,7 +149,8 @@ class Sandbox:
                 timeout=300,
             )
             response.raise_for_status()
-            return response.json()
+            result: dict[str, Any] = response.json()
+            return result
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 404:
                 raise SandboxNotFoundError(f"Sandbox {self.sandbox_id} not found") from e

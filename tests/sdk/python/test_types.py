@@ -2,8 +2,6 @@
 Unit tests for Raybox SDK types
 """
 
-import pytest
-
 from raybox.sdk.python.types import ExecutionResult
 
 

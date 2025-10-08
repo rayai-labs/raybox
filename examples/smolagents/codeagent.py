@@ -1,10 +1,9 @@
 import os
 
-from dotenv import load_dotenv
-from smolagents import CodeAgent, LiteLLMModel, WebSearchTool
-
 # Import from installed package
 from agents.smolagents import RayboxExecutor
+from dotenv import load_dotenv
+from smolagents import CodeAgent, LiteLLMModel, WebSearchTool
 
 # Load environment variables
 load_dotenv()

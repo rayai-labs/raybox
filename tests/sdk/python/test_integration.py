@@ -8,7 +8,7 @@ Make sure the Raybox API server is running at http://localhost:8000
 import pytest
 
 from raybox.sdk.python import Sandbox
-from raybox.sdk.python.exceptions import APIError, SandboxCreationError
+from raybox.sdk.python.exceptions import SandboxCreationError
 
 
 @pytest.mark.integration
@@ -152,9 +152,7 @@ print("Done")
             assert result["success"] is True
             assert result["installed"] == []
 
-    @pytest.mark.skipif(
-        True, reason="Test connection error handling - requires API to be down"
-    )
+    @pytest.mark.skipif(True, reason="Test connection error handling - requires API to be down")
     def test_connection_error(self):
         """Test handling of connection errors (run manually with API down)."""
         with pytest.raises(SandboxCreationError):
@@ -187,4 +185,6 @@ class TestSandboxConcurrency:
             result = sandbox2.execute("print(isolated_var)")
 
             assert result.success is False
-            assert "NameError" in result.error or "not defined" in result.error
+            assert result.error is not None and (
+                "NameError" in result.error or "not defined" in result.error
+            )

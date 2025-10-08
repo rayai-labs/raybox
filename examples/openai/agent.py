@@ -1,6 +1,7 @@
-from openai import OpenAI
-from raybox import Sandbox
 from dotenv import load_dotenv
+from openai import OpenAI
+
+from raybox import Sandbox
 
 # Load environment variables
 load_dotenv()
@@ -18,10 +19,7 @@ prompt = "Generate code to reverse a string 'Hello, World!' in Python"
 # Call OpenAI chat completion API
 response = client.chat.completions.create(
     model="gpt-4o",
-    messages=[
-        {"role": "system", "content": system},
-        {"role": "user", "content": prompt}
-    ]
+    messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
 )
 
 # Extract the code from the response

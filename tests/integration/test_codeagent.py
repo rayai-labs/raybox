@@ -3,9 +3,8 @@
 import os
 
 import pytest
-from smolagents import CodeAgent, LiteLLMModel, WebSearchTool
-
 from agents.smolagents.raybox_executor import RayboxExecutor
+from smolagents import CodeAgent, LiteLLMModel, WebSearchTool
 
 
 @pytest.fixture
