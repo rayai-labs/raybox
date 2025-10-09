@@ -18,7 +18,7 @@ pip install raybox
 raybox login
 ```
 
-This will open your browser to authenticate and save your API key.
+This will open your browser to authenticate. After logging in, you'll receive an API key which will be saved locally at `~/.raybox/config.json`.
 
 ### Use the SDK
 
@@ -50,6 +50,10 @@ with Sandbox(
     cpu_limit=1.0                      # CPU cores limit
 ) as sandbox:
     result = sandbox.execute("print('Configured sandbox')")
+
+# Use custom API endpoint (for self-hosted deployments)
+with Sandbox(api_url="https://your-deployment.com") as sandbox:
+    result = sandbox.execute("print('Custom endpoint')")
 ```
 
 ## Self-Hosting (Enterprise)

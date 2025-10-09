@@ -16,7 +16,48 @@ See [LICENSE](LICENSE) for full terms.
 
 ## For Licensed Users
 
-If you have a valid Raybox Enterprise license, see the main [README.md](../README.md) for development instructions.
+If you have a valid Raybox Enterprise license, follow these setup instructions:
+
+### Prerequisites
+
+- Python 3.12+
+- Docker
+- `brew install sqlc` - Database code generation
+- `brew install supabase/tap/supabase` - Database migrations
+
+### Setup
+
+```bash
+# Install dependencies
+uv sync
+
+# Setup database
+cd ee
+supabase init
+supabase link --project-ref <your-project-ref>
+supabase db push
+
+# Generate database types
+sqlc generate
+
+# Configure environment
+# Create .env file in ee/ directory:
+echo 'SUPABASE_DB_URL="postgresql://...pooler.supabase.com:6543/postgres"' > .env
+
+# Start server
+uv run raybox-server
+```
+
+### Development
+
+```bash
+# After SQL changes
+cd ee && sqlc generate
+
+# After schema changes
+cd ee && supabase migration new <name>
+cd ee && supabase db push
+```
 
 ## Getting a License
 

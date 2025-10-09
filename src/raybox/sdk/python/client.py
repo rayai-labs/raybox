@@ -8,6 +8,7 @@ from typing import Any
 
 import requests
 
+from .config import RayboxConfig
 from .exceptions import APIError, SandboxCreationError, SandboxNotFoundError
 from .types import ExecutionResult
 
@@ -24,7 +25,8 @@ class Sandbox:
             print(result.stdout)
 
     Args:
-        api_url: Raybox API URL. Defaults to RAYBOX_API_URL env var or http://localhost:8000
+        api_url: Raybox API URL. Defaults to stored config, RAYBOX_API_URL env var, or https://api.raybox.ai
+        api_key: API key for authentication. Defaults to stored config or RAYBOX_API_KEY env var
         timeout: Execution timeout in seconds
         memory_limit_mb: Memory limit in MB
         cpu_limit: CPU cores limit
@@ -33,16 +35,27 @@ class Sandbox:
     def __init__(
         self,
         api_url: str | None = None,
+        api_key: str | None = None,
         timeout: int = 300,
         memory_limit_mb: int = 512,
         cpu_limit: float = 1.0,
     ):
-        self.api_url = api_url or os.getenv("RAYBOX_API_URL", "http://localhost:8000")
+        # Load config from file if not provided
+        config = RayboxConfig()
+
+        self.api_url = api_url or os.getenv("RAYBOX_API_URL") or config.get_api_url()
+
+        self.api_key = api_key or os.getenv("RAYBOX_API_KEY") or config.get_api_key()
+
         self.timeout = timeout
         self.memory_limit_mb = memory_limit_mb
         self.cpu_limit = cpu_limit
         self.sandbox_id: str | None = None
         self.session = requests.Session()
+
+        # Set authorization header if API key is available
+        if self.api_key:
+            self.session.headers.update({"Authorization": f"Bearer {self.api_key}"})
 
     def __enter__(self) -> "Sandbox":
         """Create a sandbox when entering context."""

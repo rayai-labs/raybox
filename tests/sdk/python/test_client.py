@@ -15,10 +15,10 @@ class TestSandboxInit:
     """Test Sandbox initialization."""
 
     def test_default_initialization(self):
-        """Test default initialization values."""
+        """Test default initialization values (cloud API)."""
         sandbox = Sandbox()
 
-        assert sandbox.api_url == "http://localhost:8000"
+        assert sandbox.api_url == "https://api.raybox.ai"
         assert sandbox.timeout == 300
         assert sandbox.memory_limit_mb == 512
         assert sandbox.cpu_limit == 1.0
